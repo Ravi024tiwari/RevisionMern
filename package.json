@@ -1,0 +1,16 @@
+{
+  "name": "mernproject",
+  "version": "1.0.0",
+  "description": "Revising a Project Code",
+  "keywords": [
+    "code",
+    "learn"
+  ],
+  "license": "ISC",
+  "author": "Ravi Tiwari",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
