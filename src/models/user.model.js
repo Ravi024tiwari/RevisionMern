@@ -59,7 +59,7 @@ UserSchema.pre("save",async function(next){//ye userShema par encrption chal rha
   try{
     //const salt =await bcrypt.getSalt(10);
     this.password =await bcrypt.hash(this.password,10);//save the hash password
-    next();
+    next();//save krne jab ja rhe ho pahle isko kar lena then next() chala lena
   }
   catch(err){
     next(err);
@@ -67,6 +67,7 @@ UserSchema.pre("save",async function(next){//ye userShema par encrption chal rha
 })
 
 //now make some methods on UserSchame
+//kyuki se hamesa kaam nhi karna its only when verify user
 UserSchema.methods.ispasswordCorrect =async function(password){//ye password user bhejega
    return  await bcrypt.compare(password, this.password);
   //return true or false value during comparing the incoming and store  password

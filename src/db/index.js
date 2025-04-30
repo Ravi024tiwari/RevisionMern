@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { DB_NAME } from "../constants.js";
 
- const connectDB =async ()=>{
+ const connectDB =async ()=>{//its return promise
   try{
     const connectionInstance= await mongoose.connect(`mongodb://127.0.0.1:27017/${DB_NAME}`);//yha par mai .env se bhi le sakta hu 
      console.log(`MongoDB connectec Successfully !! DB HOST: ${connectionInstance.connection.host}`)
