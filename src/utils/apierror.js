@@ -1,23 +1,26 @@
-class Apierror extends Error{
+class Apierror extends Error {
     constructor(
-         statusCode,
-         message="Something went wrong!!",
-         errors =[],//array of error
-         stack ="",
+        statusCode,
+        message = "Something went wrong",//this is parameter's that hold all {key:value} of different errors
+        errors =[],//this holds all the defults error
+        stack =""
     ){
-        this.statusCode =statusCode,
-        this.message =message,
-        this.errors =errors,
-        this.success =false,
-        this.data =null;
+        super(message)//this is inheritence property
+        this.statusCode =statusCode
+        this.data =null
+        this.message =message;
+        this.success =false
+        this.errors =errors
 
-        if(stack){//to trace the error on files
-             this.stack =stack;
+        if(stack) {
+            this.stack =stack
         }
         else{
             Error.captureStackTrace(this,this.constructor)
+            //stack trace give info where the error is occure {file name,line number } in stack form in all the file
+            //its helpful in debugging the error to the clients
         }
     }
 }
 
-export {Apierror};
+export {Apierror}
