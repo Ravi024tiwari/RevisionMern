@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import {UserModel} from "../models/user.model.js"//its use to communicate with database
 
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
+import { response } from "express";
 
 //asyncHandler only do to avoid to write try catch and asyn fuction
 const generateAccessAndRefreshToken = async (userId) => {
@@ -312,4 +313,107 @@ const refreshAccessToken =asyncHandler(async(req,res)=>{
     }
 })
 
-export {registerUser,loginUser,logoutUser,refreshAccessToken};
+//change Current Password
+const ChangeCurrentPassword =asyncHandler(async(req,res)=>{
+  const {oldPassword,newPassword} =req.body;
+
+  if(!newPassword || newPassword.trim()===""){
+    throw new Apierror(401,"Password is not exit!!");
+  }
+  //after use of middleware we get that logged in usr
+
+  const userId =req.user?._id;//here we get that logged in user id
+  console.log("The req user from the verify jwt:",req?.user);
+
+  const user =await UserModel.findById(userId);
+  console.log("The searched user:",user);
+
+
+  if(!user){
+    throw new Apierror(500,"User is not formed!!");
+  }
+  //yha abhi looged in hia
+  const ispasswordCorrect =await user.ispasswordCorrect(oldPassword);
+  if(!ispasswordCorrect){
+    throw new Apierror(401,"Invalid password!!");
+  }
+  //now we have to set the new password
+
+  user.password=newPassword;//here we saved in password
+  //here after that pre hooks get into function save hash the password before saved
+
+ await user.save({validateBeforeSave:false});//here we save that changed password !!
+
+ return res
+ .status(200)
+ .json(new ApiResponse(200,
+  {},
+  "Changed Password is Successfully!!"
+ ))
+
+  //now get that logged in user where we change password 
+})
+
+
+//now we have to findOut the current login user
+
+const currentLoggedInUser =asyncHandler(async(req,res)=>{
+  const userId =req?.user._id;//here its also a current logged in user by user of verify jwt
+
+  //now find that logged in user from db
+  const currentUser =await UserModel.findById(userId).select(("-password -refreshToken")) ;
+
+  if(!currentUser){
+    throw new Apierror(501,"Current logged in user not found!!");
+  }
+
+  return res
+  .status(200)
+  .json(new ApiResponse(200,
+    {currentUser},
+    "Successfully got the current user!!"
+
+  ))
+})
+
+//Update files or picture
+//here the todo of updation of avatar 
+//User of multer as a middleware to upload the profile picture of using {upload from multer}
+//and then use verify jwt to get that logged in user to set that avatar url in the user 
+//then upload the local file path of file into cloudnary to get the url of that file
+//Now save that user into the database and then send the respose of that saved user by using new apiresponse
+const updateProfile =asyncHandler(async(req,res)=>{
+
+  const {avatar,coverImage} =req.files;//here we get the files
+
+  const newavatarPath =avatar[0]?.path;//here we get the local server path for multer
+  const newCoverImagepath =coverImage[0]?.path;
+
+  if(!newCoverImagepath || !newavatarPath){
+    throw new Apierror(401,"Files path is not found successfully!!");
+  }
+  const uploadnewAvatar =await uploadOnCloudinary(newavatarPath);
+  const uploadnewCoverImage =await uploadOnCloudinary(newCoverImagepath);
+
+  if(!uploadnewAvatar || !uploadnewCoverImage){
+    throw new Apierror(501,"Uploadation is unsuccessfull");
+  }
+  //set their url for avatar and coverImage
+
+  const userId =req.user?._id;
+  const user =await UserModel.findById(userId)//here we get that Current User
+  user.avatar =uploadnewAvatar?.url,
+  user.coverImage =uploadnewCoverImage?.url;//here we set the coverimgae path url
+
+  
+
+user.save({validateBeforeSave:false})
+
+return res
+.status(200)
+.json(new ApiResponse(200,
+  {user},
+  "Successfully updated the avatar and coverImage!!"
+))
+})
+export {registerUser,loginUser,logoutUser,refreshAccessToken,ChangeCurrentPassword,currentLoggedInUser,updateProfile};

@@ -1,5 +1,7 @@
 import { Router } from "express";
-import { loginUser, registerUser,logoutUser ,refreshAccessToken} from "../controllers/user.controller.js";
+import { loginUser, registerUser,logoutUser ,refreshAccessToken,ChangeCurrentPassword,
+          currentLoggedInUser,updateProfile} from "../controllers/user.controller.js";
+
 import {upload} from "../middlewares/multer.middleware.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 const Userrouter =Router()
@@ -16,5 +18,15 @@ Userrouter.route("/register").post(upload.fields(//use of middleware during uplo
  Userrouter.route("/logout").post(verifyJWT,logoutUser);
 //here we use patch request to update the token
  Userrouter.route("/accessToken").patch(refreshAccessToken)
+
+ Userrouter.route("/changePassword").patch(verifyJWT,ChangeCurrentPassword)//here we use that verify jwt password
+
+ Userrouter.route("/currentUser").get(verifyJWT,currentLoggedInUser)//here we get the current logged in user
+
+ Userrouter.route("/updateProfile").patch(upload.fields(
+    [{name:'avatar',maxCount:1},
+     {name:'coverImage',maxCount:1}
+    ])
+ ,verifyJWT,updateProfile)
 
 export default Userrouter;
