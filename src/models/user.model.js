@@ -41,18 +41,18 @@ const UserSchema =new mongoose.Schema(
         ],
         password:{
             type:String,
-            required:[true,"Password is required!!"]
+            required:true,
+            trim :true
         },
         refreshToken:{
             type:String,
         }
 
-        
-
     },{timestamps:true}
 )
 //firstly hash the passwords //use as a middleware
 UserSchema.pre("save",async function(next){//ye userShema par encrption chal rha hai
+    console.log("Before hashing the password::",this.password);
   if(!this.isModified("password")){
     return next();//iske badd aage badh jaao
   }
@@ -90,7 +90,7 @@ UserSchema.methods.ispasswordCorrect =async function(password){//ye password use
     )
 }
 
-UserSchema.methods.refreshToken =function(){
+UserSchema.methods.generaterefreshToken =function(){
     return jwt.sign(//ye payload se hame ye info of that user mil sakti by use of accesstoken
         {
             _id:this._id,

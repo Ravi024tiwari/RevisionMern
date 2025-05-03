@@ -27,5 +27,6 @@ import userRouter from "./routes/user.route.js"//isko import kiya
 //routes declaration 
 //this is company based routing
 app.use("/api/v1/user",userRouter)//its act as a middleware for the routes
+//after tracking /api/v1/user it transfrom to userRouter
 
 export {app};//not by default
