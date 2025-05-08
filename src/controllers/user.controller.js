@@ -416,4 +416,77 @@ return res
   "Successfully updated the avatar and coverImage!!"
 ))
 })
-export {registerUser,loginUser,logoutUser,refreshAccessToken,ChangeCurrentPassword,currentLoggedInUser,updateProfile};
+
+//for getting agreegation pipeline
+const getUserChannelProfile = asyncHandler(async(req,res)=>{
+  const {username} =req.params;
+
+  if(!username?.trim()){
+   throw new Apierror(401,"Username is missing.. ")
+  }
+
+const channel = await UserModel.aggregate([
+   {
+      $match:{
+         username:username?.lowerCase()//change the username into lowercase
+      },
+      $lookup:{//its is used to find the subscriber of mine
+         from:"subscriptionModel",
+         localField:_id,
+         foreignField:"channel",
+         as:"subscribers"
+      },
+      $lookup:{//its is used to find jisko maine subscribe kiya hai
+         from:"subscriptionModel",
+         localField:_id,
+         foreignField:"subscriber",
+         as:"subscribeTo",
+      },
+   },
+      {
+         $addFields:{
+            subscribersCount:{
+               $size:"$subscribers"
+            },
+            channelsSubscribedToCount:{
+               $size:"$subscribedTo"
+            },
+            isSubscribed:{
+               $condi:{
+                  if:{$in :[req.user?._id,"subscribers.subscriber"]},//it should be in aray or object
+                  then:true,
+                  else :false
+               }
+            }
+         }
+      },
+     {
+      $project:{
+         fullName:1,
+         username:1,
+         subscribersCount:1,
+         channelsSubscribedToCount:1,
+         isSubscribed:1,
+         avatar:1,
+         coverImage:1,
+         email:1,
+
+      }
+     }
+   
+  
+  ])
+  if(!channel?.length){
+   throw new Apierror(404,"Channel does not exit!")//its return array in response with agreegate
+  }
+
+  return res
+  .status(200)
+  .json(
+    new ApiResponse(200,channel[0],"user channel fetched successfully!")//its fetched the data from array--
+  )
+})
+
+
+export {registerUser,loginUser,logoutUser,refreshAccessToken,
+  ChangeCurrentPassword,currentLoggedInUser,updateProfile,getUserChannelProfile};

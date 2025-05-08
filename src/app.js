@@ -23,10 +23,13 @@ app.use(cookieParser());
 
 //routes import
 import userRouter from "./routes/user.route.js"//isko import kiya
+import { TweetRouter } from "./routes/tweet.routes.js";
 
 //routes declaration 
 //this is company based routing
 app.use("/api/v1/user",userRouter)//its act as a middleware for the routes
 //after tracking /api/v1/user it transfrom to userRouter
+//now we use the route path 
+app.use("/api/v1/tweet",TweetRouter);
 
 export {app};//not by default
